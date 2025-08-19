@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Planta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f3;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2d3e50;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #4caf50;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Registro de Planta</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <label for="id_plant_name">Nome Científico</label>
+            {{ form.plant_name }}
+
+            <label for="id_plant_popular_name">Nome Popular</label>
+            {{ form.plant_popular_name }}
+
+            <label for="id_plant_photo">Foto da Planta</label>
+            <input type="file" name="plant_photo" accept="image/*" capture="environment" required>
+
+            <label for="id_num_individuals">Número de Indivíduos</label>
+            {{ form.num_individuals }}
+
+            <label for="id_num_flowers">Número de Flores</label>
+            {{ form.num_flowers }}
+
+            <label for="id_scent">Tipo de Aroma</label>
+            {{ form.scent }}
+
+            <label for="id_resources">Recursos Observados</label>
+            {{ form.resources }}
+
+            <button type="submit" class="submit-btn">Salvar Planta</button>
+        </form>
+    </div>
+</body>
+</html>
