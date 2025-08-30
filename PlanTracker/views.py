@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.db import models
 from .forms import LoginForm, RegisterForm, RegisterProjectForm, FilterProjectForm, RegisterPlantForm, RegisterVisitorForm
-from .models import RegisterProjectModel, RegisterPlantModel
+from .models import RegisterProjectModel, RegisterPlantModel, RegisterVisitorModel
 
 # login_view <- LoginForm
 # A página que aparece ao abrir o site, com opção de preencher dados e fazer o login ou registrar.
@@ -99,6 +99,28 @@ def register_visitor(request, plant_id):
             return redirect("", project_id=project.id)                   # Leva pro detalhes do projeto, ainda não criado
     return render(request, "PlanTracker/register_visitor.html", {"form" : form, "plant" : plant, "project" : project})
 
+@login_required
+def project_details(request, project_id):
+    project = get_object_or_404(RegisterProjectModel, id=project_id)
+
+    if request.user != project.project_owner and request.user not in project.project_colaborator.all():
+        return HttpResponse("Acesso negado", status=403)
+    
+    plants = RegisterPlantModel.objects.filter(project=project)
+
+    return render(request, "PlanTracker/project_details.html", {"project":project, "plants":plants})
+
+@login_required
+def plant_details(request, plant_id):
+    plant = get_object_or_404(RegisterPlantModel, id=plant_id)
+    project = plant.project
+
+    if request.user != project.project_owner and request.user not in project.project_colaborator.all():
+        return HttpResponse("Acesso negado", status=403)
+
+    visitors = RegisterVisitorModel.objects.filter(plant=plant)
+
+    return render(render, "PlanTracker/plant_details.html", {"plant":plant, "project":project, "visitors":visitors})
 
 #Incompleto
 #@login_required

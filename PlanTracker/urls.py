@@ -7,5 +7,7 @@ urlpatterns = [
     path("home/", views.home, name="home"),
     path("new_project/", views.register_project, name="register_project"),
     path("<int:project_id>/new_plant/", views.register_plant, name="register_plant"), 
-    path("<int:plant_id>/new_visitor/", views.register_visitor, name="register_visitor")
+    path("<int:plant_id>/new_visitor/", views.register_visitor, name="register_visitor"),
+    path("<int:project_id>/project_details/", views.project_details, name="project_details"),
+    path("<int:plant_id>/plant_details/", views.plant_details, name="plant_details"),
 ]
