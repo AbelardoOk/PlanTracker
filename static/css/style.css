@@ -33,3 +33,30 @@ body {
     margin-top: 1.8rem !important; /* Alinha o botão com os inputs em telas maiores */
   }
 }
+
+/* Estilos para os cards de planta */
+.card-plant {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-plant:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-plant .card-img-top {
+  width: 100%;
+  height: 200px; /* Altura fixa para as imagens */
+  object-fit: cover; /* Garante que a imagem cubra o espaço sem distorcer */
+}
+
+.card-plant .card-img-top-placeholder {
+  width: 100%;
+  height: 200px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.card-plant .card-footer {
+  display: flex;
+  justify-content: space-between; /* Alinha os botões nas extremidades */
+}

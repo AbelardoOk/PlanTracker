@@ -78,8 +78,28 @@ def register_plant(request, project_id):
             plant.project = project
             plant.save()
             messages.success(request, "Planta adicionada com sucesso")
-            return redirect("", project_id=project.id)                   # Leva pro detalhes do projeto, ainda não criado
+            return redirect("project_details", project_id=project.id)                  # Leva pro detalhes do projeto, ainda não criado
     return render(request, "PlanTracker/register_plant.html", {"form" : form, "project" : project})
+
+@login_required
+def delete_plant(request, plant_id):
+    plant = get_object_or_404(RegisterPlantModel, id=plant_id)
+    project = plant.project # Pega o projeto ao qual a planta pertence
+
+    # Permite a exclusão se o usuário for o dono ou um colaborador
+    if request.user != project.project_owner and request.user not in project.project_colaborator.all():
+        messages.error(request, "Você não tem permissão para excluir plantas neste projeto.")
+        return redirect('project_details', project_id=project.id)
+
+    if request.method == 'POST':
+        plant_name = plant.plant_name
+        plant.delete()
+        messages.success(request, f"A planta '{plant_name}' foi excluída com sucesso.")
+        # Redireciona de volta para a página de detalhes do projeto
+        return redirect('project_details', project_id=project.id)
+
+    # Se não for POST, apenas redireciona
+    return redirect('project_details', project_id=project.id)
 
 @login_required
 def register_visitor(request, plant_id):
