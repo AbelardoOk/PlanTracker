@@ -1,11 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <div>Homepage</div>
-</body>
-</html>
+{% extends 'PlanTracker/base.html' %} {% block title %}Página Inicial -
+PlanTracker{% endblock %} {% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+    <h1 class="mb-0">Meus Projetos</h1>
+    <a href="{% url 'register_project' %}" class="btn btn-success">
+      <i class="bi bi-plus-circle-fill"></i> Criar Novo Projeto
+    </a>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-center">
+        <div class="col-md-5">{{ form.nome.label_tag }} {{ form.nome }}</div>
+        <div class="col-md-5">
+          {{ form.instituicao.label_tag }} {{ form.instituicao }}
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-primary mt-3">Filtrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <h2 class="mb-3">Criados por mim</h2>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for project in my_projects %}
+    <div class="col">
+      <div class="card h-100 shadow-sm card-project">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ project.project_name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            {{ project.project_institution }}
+          </h6>
+          <p class="card-text flex-grow-1">
+            {{ project.project_description|truncatewords:20 }}
+          </p>
+          <div class="mt-auto pt-3 border-top">
+            <a
+              href="{% url 'project_details' project.id %}"
+              class="btn btn-outline-primary btn-sm"
+              title="Ver Detalhes"
+            >
+              <i class="bi bi-eye-fill"></i> Detalhes
+            </a>
+            <a
+              href="{% url 'register_plant' project.id %}"
+              class="btn btn-outline-success btn-sm"
+              title="Adicionar Planta"
+            >
+              <i class="bi bi-plus-lg"></i> Planta
+            </a>
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteProjectModal-{{ project.id }}"
+              title="Remover Projeto"
+            >
+              <i class="bi bi-trash-fill"></i> Remover
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="deleteProjectModal-{{ project.id }}"
+      tabindex="-1"
+      aria-labelledby="deleteModalLabel-{{ project.id }}"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel-{{ project.id }}">
+              Confirmar Exclusão
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Tem certeza que deseja excluir o projeto "<strong
+              >{{ project.project_name }}</strong
+            >"?
+            <p class="text-danger mt-2">Esta ação não pode ser desfeita.</p>
+          </div>
+          <div class="modal-footer">
+            <form action="{% url 'delete_project' project.id %}" method="post">
+              {% csrf_token %}
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <p class="text-muted">
+        Você ainda não criou nenhum projeto. Que tal
+        <a href="{% url 'register_project' %}">começar agora</a>?
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-5" />
+  <h2 class="mb-3">Compartilhados comigo</h2>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for project in shared_projects %}
+    <div class="col">
+      <div class="card h-100 shadow-sm card-project">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ project.project_name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            Dono(a): {{ project.project_owner.username }}
+          </h6>
+          <p class="card-text flex-grow-1">
+            {{ project.project_description|truncatewords:20 }}
+          </p>
+          <div class="mt-auto pt-3 border-top">
+            <a
+              href="{% url 'project_details' project.id %}"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="bi bi-eye-fill"></i> Ver Detalhes
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <p class="text-muted">Nenhum projeto foi compartilhado com você ainda.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

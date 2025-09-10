@@ -122,10 +122,28 @@ def plant_details(request, plant_id):
 
     return render(render, "PlanTracker/plant_details.html", {"plant":plant, "project":project, "visitors":visitors})
 
+@login_required
+def delete_project(request, project_id):
+    project = get_object_or_404(RegisterProjectModel, id=project_id)
+
+    # Apenas o dono do projeto pode deletá-lo
+    if request.user != project.project_owner:
+        messages.error(request, "Você não tem permissão para excluir este projeto.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        project_name = project.project_name
+        project.delete()
+        messages.success(request, f"O projeto '{project_name}' foi excluído com sucesso.")
+        return redirect('home')
+
+    # Se o método não for POST, redireciona para a home (medida de segurança)
+    return redirect('home')
+
+
 #Incompleto
 #@login_required
 def home(request):
-    print("K"*1000)
     print(request.user)
     my_projects = RegisterProjectModel.objects.filter(project_owner=request.user)
     shared_projects = RegisterProjectModel.objects.filter(project_colaborator=request.user)

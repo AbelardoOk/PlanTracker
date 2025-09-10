@@ -1,0 +1,146 @@
+{% extends 'PlanTracker/base.html' %} {% block title %}Detalhes de {{
+project.project_name }}{% endblock %} {% block content %}
+<div class="container">
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Detalhes do Projeto</h2>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title">{{ project.project_name }}</h3>
+      <h5 class="card-subtitle mb-2 text-muted">
+        {{ project.project_institution }}
+      </h5>
+      <p class="card-text mt-3">{{ project.project_description }}</p>
+      <hr />
+      <div class="row">
+        <div class="col-md-6">
+          <strong><i class="bi bi-person-fill"></i> Dono do Projeto:</strong>
+          <p>{{ project.project_owner.username }}</p>
+        </div>
+        <div class="col-md-6">
+          <strong><i class="bi bi-people-fill"></i> Colaboradores:</strong>
+          {% if project.project_colaborator.all %}
+          <p>
+            {% for collaborator in project.project_colaborator.all %}
+            <span class="badge bg-secondary">{{ collaborator.username }}</span>
+            {% endfor %}
+          </p>
+          {% else %}
+          <p class="text-muted">Nenhum colaborador adicionado.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+    <h2 class="mb-0">Plantas Registradas</h2>
+    <a href="{% url 'register_plant' project.id %}" class="btn btn-success">
+      <i class="bi bi-plus-circle-fill"></i> Adicionar Nova Planta
+    </a>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    {% for plant in plants %}
+    <div class="col">
+      <div class="card h-100 shadow-sm card-plant">
+        {% if plant.plant_photo %}
+        <img
+          src="{{ plant.plant_photo.url }}"
+          class="card-img-top"
+          alt="{{ plant.plant_name }}"
+        />
+        {% else %}
+        <div
+          class="card-img-top-placeholder d-flex align-items-center justify-content-center bg-light"
+        >
+          <i class="bi bi-flower3" style="font-size: 4rem; color: #ccc"></i>
+        </div>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ plant.plant_name }}</h5>
+          <p class="card-text text-muted">
+            {{ plant.plant_popular_name|default_if_none:"" }}
+          </p>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+          <a
+            href="{% url 'plant_details' plant.id %}"
+            class="btn btn-outline-primary btn-sm"
+            title="Ver Detalhes"
+          >
+            <i class="bi bi-eye"></i> Detalhes
+          </a>
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#deletePlantModal-{{ plant.id }}"
+            title="Remover Planta"
+          >
+            <i class="bi bi-trash"></i> Remover
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="deletePlantModal-{{ plant.id }}"
+      tabindex="-1"
+      aria-labelledby="deletePlantModalLabel-{{ plant.id }}"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deletePlantModalLabel-{{ plant.id }}">
+              Confirmar Exclusão
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Tem certeza que deseja excluir a planta "<strong
+              >{{ plant.plant_name }}</strong
+            >"?
+          </div>
+          <div class="modal-footer">
+            <form action="{% url 'delete_plant' plant.id %}" method="post">
+              {% csrf_token %}
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info" role="alert">
+        Ainda não há plantas registradas neste projeto.
+        <a href="{% url 'register_plant' project.id %}" class="alert-link"
+          >Adicione a primeira!</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-5">
+    <a href="{% url 'home' %}" class="btn btn-secondary"
+      ><i class="bi bi-arrow-left"></i> Voltar para Meus Projetos</a
+    >
+  </div>
+</div>
+{% endblock %}

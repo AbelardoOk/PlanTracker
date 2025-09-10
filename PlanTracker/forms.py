@@ -48,10 +48,44 @@ class FilterProjectForm(forms.Form):
     nome = forms.CharField(label="Nome do Projeto", required=False)
     instituicao = forms.CharField(label="Instituição", required=False)
 
+
 class RegisterPlantForm(forms.ModelForm):
     class Meta:
         model = RegisterPlantModel
-        fields = ["plant_name", "plant_popular_name", "plant_photo", "num_individuals", "num_flowers", "scent", "resources"]
+        fields = [
+            'plant_name', 'plant_popular_name', 'plant_photo', 'num_individuals', 
+            'num_flowers', 'scent', 'resources'
+        ]
+        widgets = {
+            'plant_name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Handroanthus impetiginosus'
+            }),
+            'plant_popular_name': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Ipê Roxo'
+            }),
+            'plant_photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',      # Garante que só imagens serão aceitas
+                # 'capture': 'environment'  // Adicionar 'capture' no HTML é mais confiável
+            }),
+            'num_individuals': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'min': '1'
+            }),
+            'num_flowers': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'min': '0'
+            }),
+            'scent': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'resources': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Néctar, Pólen'
+            }),
+        }
 
 
 class RegisterVisitorForm(forms.ModelForm):
