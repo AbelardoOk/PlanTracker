@@ -3,6 +3,36 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import RegisterProjectModel, RegisterPlantModel, RegisterVisitorModel
 
+TYPE_LIST = [
+    ('abelha', 'Abelha'),
+    ('borboleta', 'Borboleta'),
+    ('besouro', 'Besouro'),
+    ('beija_flor', 'Beija-flor'),
+    ('mariposa', 'Mariposa'),
+    ('vespa', 'Vespa'),
+    ('mosca', 'Mosca'),
+    ('tripes', 'Tripes'),
+    ('percevejo', 'Percevejo'),
+    ('outros', 'Outros'),
+]
+
+RESOURCES_LIST = [
+    ('polen', 'Pólen'),
+    ('nectar', 'Néctar'),
+    ('tecido', 'Tecido'),
+    ('oleo', 'Óleo'),
+    ('fragrancias', 'Fragrâncias'),
+    ('resinas', 'Resinas'),
+]
+
+EXPORT_CHOICES = [
+    ('projects', 'Projetos'),
+    ('plants', 'Plantas'),
+    ('visitors', 'Visitantes'),
+    ('locations', 'Localizações'),
+    ('all', 'Tudo'),
+]
+
 # Formulário para usar na views.py dentro do login.html
 class LoginForm(forms.Form):
     username = forms.CharField(label="Usuário", max_length=150)
@@ -50,9 +80,23 @@ class RegisterProjectForm(forms.ModelForm):
         fields = ["project_name", "project_advisor", "project_colaborator", "project_location", "project_institution"]
 
 class FilterProjectForm(forms.Form):
-    nome = forms.CharField(label="Nome do Projeto", required=False)
-    instituicao = forms.CharField(label="Instituição", required=False)
-
+    project_name = forms.CharField(label="Nome do projeto", required=False)
+    plant_name = forms.CharField(label="Nome da planta", required=False)
+    type_visitor = forms.MultipleChoiceField(
+        choices=TYPE_LIST,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Tipo de visitante"
+    )
+    resources = forms.MultipleChoiceField(
+        choices=RESOURCES_LIST,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Recursos utilizados"
+    )
+    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    export_options = forms.ChoiceField(choices=EXPORT_CHOICES, required=False, label="Exportar apenas")
 
 class RegisterPlantForm(forms.ModelForm):
     class Meta:
@@ -94,8 +138,8 @@ class RegisterPlantForm(forms.ModelForm):
 
 
 class RegisterVisitorForm(forms.ModelForm):
-    list_type = [("abelha", "Abelha"), ("borboleta", "Borboleta"), ("besouro", "Besouro"), ("beija flor", "Beija flor"), ("mariposa", "Mariposa"), ("vespa", "Vespa"), ("mosca", "Mosca"), ("tripes", "Tripes"), ("percevejo", "Percevejo"), ("outros", "Outros")]
-    list_resources = [("pólen", "Pólen"), ("néctar", "Néctar"), ("tecido", "Tecido"), ("óleo", "Óleo"), ("fragâncias", "Fragâncias"), ("resinas", "Resinas")]
+    list_type = TYPE_LIST
+    list_resources = RESOURCES_LIST
     
     flowers_visitor = forms.MultipleChoiceField(choices=list_type, widget=forms.CheckboxSelectMultiple, required=False, label="Tipo de visitantes")
     resources_visitor = forms.MultipleChoiceField(choices=list_resources, widget=forms.CheckboxSelectMultiple, required=False, label="Tipo de recursos")

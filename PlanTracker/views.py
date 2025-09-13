@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db import models
+import csv
 from .forms import LoginForm, RegisterForm, RegisterProjectForm, FilterProjectForm, RegisterPlantForm, RegisterVisitorForm
 from .models import RegisterProjectModel, RegisterPlantModel, RegisterVisitorModel
 
@@ -34,7 +35,7 @@ def login_view(request):
 # register_view <- RegisterForm
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect("home")                      
+        return redirect("home/")                      
     
     form = RegisterForm(request.POST or None)
     if request.method == "POST":
@@ -160,8 +161,6 @@ def delete_project(request, project_id):
     # Se o método não for POST, redireciona para a home (medida de segurança)
     return redirect('home')
 
-
-#Incompleto
 #@login_required
 def home(request):
     print(request.user)
@@ -179,10 +178,46 @@ def home(request):
 
     return render(request, "PlanTracker/home.html", context)
 
-# Incompleto
-#@login_required
-def export_projects(request):
-    # Se quiser mudar para exportar qualquer projeto:
-    # projects = RegisterProjectModel.objects.filter(models.Q(owner=request.user) | models.Q(colaboradores=request.user)).distinct()
-    projects =  RegisterProjectModel.objects.filter(project_owner=request.user)
+@login_required
+def filter_and_export(request):
+    form = FilterProjectForm(request.GET or None)
+    results = RegisterVisitorModel.objects.select_related('plant__project').all() # Evita N+1 (ou era pra fazer isso)
+    
+    if form.is_valid():
+        name = form.cleaned_data.get("project_name")
+        start_date = form.cleaned_data.get("date_from")
+        end_date = form.cleaned_data.get("date_to")
+        visitor_type = form.cleaned_data.get("type_visitor")
+        resource = form.cleaned_data.get("resources")
 
+        if name:
+            results = results.filter(plant__project__project_name__icontains=name)
+        if start_date:
+            results = results.filter(date__gte=start_date)
+        if end_date:
+            results = results.filter(date__lte=end_date)
+        if visitor_type:
+            results = results.filter(type_visitor__ic=visitor_type)  # __icontains
+        if resource:
+            results = results.filter(resources_visitor__ic=resource)  # Qualquer coisa mudar resources_visitor__icontains
+
+    # Se o usuário clicou em "Exportar"
+    if "export" in request.GET:
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="export.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["Registro", "Visitante", "Tipo", "Planta", "Projeto", "Data/Hora", "Localização", "Recursos"])
+        for v in results:
+            writer.writerow([
+                v.visitor_id,
+                v.name,
+                v.type_visitor,
+                f"{v.plant.name} ({v.plant.plant_id})",
+                v.plant.project.project_name,
+                f"{v.date} {v.time}",
+                f"{v.latitude}, {v.longitude}",
+                v.resources_visitor,
+            ])
+        return response
+
+    return render(request, "PlanTracker/filter_page.html", {"form": form, "results": results})

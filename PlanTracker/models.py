@@ -54,7 +54,6 @@ class RegisterPlantModel(models.Model):
 
         super().save(*args, **kwargs)
 
-                
 class RegisterVisitorModel(models.Model):
     plant = models.ForeignKey(RegisterPlantModel, on_delete=models.CASCADE)      # Registra com a classe pai sendo RegisterPlantModel
     visitor_id = models.PositiveIntegerField(editable=False)
