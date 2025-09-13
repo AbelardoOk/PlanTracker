@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.contrib.auth.models import User
 from .models import RegisterProjectModel, RegisterPlantModel, RegisterVisitorModel
@@ -23,9 +24,13 @@ class RegisterForm(forms.Form):
 
     # Verifica se email é valido (somente se termina com @gmail.com)
     def clean_email(self):
-        email = self.cleaned_data['email']
-        if not email.endswith("@gmail.com"):
-            raise forms.ValidationError("O email deve terminar com @gmail.com")
+        email = self.cleaned_data.get('email')
+
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+        if email and not re.match(email_regex, email):
+            raise forms.ValidationError("Por favor, insira um endereço de email válido.")
+
         return email
     
     # Faz confirmação de senha

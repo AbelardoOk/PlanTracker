@@ -35,25 +35,25 @@ class RegisterPlantModel(models.Model):
 
     # Verifica se o nome da planta ja existe para usar o mesmo id
     def save(self, *args, **kwargs):
-        plant_name_unidecoded = unidecode(self.plant_name).lower().replace(" ", "")
+        if not self.pk: 
+            plant_name_unidecoded = unidecode(self.plant_name).lower().replace(" ", "")
 
-        # Faz um for em todas as plantas pra procurar algum nome igual, unidecode padroniza os nomes
-        existing_plants  = RegisterPlantModel.objects.all()
-        for i in existing_plants:
-            plant_name_db_unidecoded = unidecode(i.plant_name).lower().replace(" ", "")
+            # Busca no banco por uma planta com o nome normalizado. '__iexact' ignora maiúsculas/minúsculas.
+            existing_plant = RegisterPlantModel.objects.filter(plant_name__iexact=self.plant_name).first()
 
-            if plant_name_db_unidecoded == plant_name_unidecoded:
-                self.plant_id = i.plant_id
-                break
-        else:
-            last = RegisterPlantModel.objects.aggregate(models.Max('plant_id'))['plant_id__max']
-            if last:
-                last_id = int(last[2:])
+            if existing_plant:
+                self.plant_id = existing_plant.plant_id
             else:
-                last_id = 0
-            self.plant_id = f"PA{last_id + 1:03d}"
+                # Lógica para criar um novo ID
+                last = RegisterPlantModel.objects.aggregate(Max('plant_id'))['plant_id__max']
+                if last:
+                    last_id = int(last[2:])
+                else:
+                    last_id = 0
+                self.plant_id = f"PA{last_id + 1:03d}"
 
         super().save(*args, **kwargs)
+
                 
 class RegisterVisitorModel(models.Model):
     plant = models.ForeignKey(RegisterPlantModel, on_delete=models.CASCADE)      # Registra com a classe pai sendo RegisterPlantModel
@@ -79,9 +79,9 @@ class RegisterVisitorModel(models.Model):
 
     # Cria um visitor_id para cada visitante da planta, independente da sua pk no bd
     def save(self, *args, **kwargs):
-        if self._state.adding and self.visitante_id is None:
-            last_id = RegisterVisitorModel.objects.filter(plant=self.plant).aggregate(max('visitante_id'))['visitante_id__max'] or 1
-            self.visitante_id = last_id + 0
+        if self._state.adding and self.visitor_id is None:
+            last_id = RegisterVisitorModel.objects.filter(plant=self.plant).aggregate(max('visitor_id'))['visitor_id__max'] or 1
+            self.visitor_id = last_id + 0
 
         if self.use_now:
             now = timezone.localtime()
